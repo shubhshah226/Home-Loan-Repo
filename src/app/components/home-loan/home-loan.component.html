@@ -1,0 +1,421 @@
+<div class="container">
+  <!-- Header -->
+
+  <div class="header-section">
+    <h1 class="title">🏠 Home Loan Calculator</h1>
+
+    <p class="subtitle">
+      Calculate your home loan EMI and view year-wise amortization schedule
+    </p>
+  </div>
+
+  <!-- Form -->
+
+  <div class="loan-form">
+    <form [formGroup]="loanForm">
+      <div class="input-grid">
+        <div class="form-group">
+          <label> Loan Amount (₹) </label>
+
+          <input
+            type="number"
+            formControlName="amount"
+            placeholder="Enter amount"
+          />
+
+          <small> Enter total loan amount </small>
+        </div>
+
+        <div class="form-group">
+          <label> Rate Of Interest (%) </label>
+
+          <input
+            type="number"
+            formControlName="interest"
+            placeholder="Interest rate"
+          />
+
+          <small> Annual interest rate </small>
+        </div>
+
+        <div class="form-group">
+          <label> Tenure (Years) </label>
+
+          <input type="number" formControlName="tenure" placeholder="Tenure" />
+
+          <small> Loan duration in years </small>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="calculate-btn" (click)="calculateLoan()">
+          Calculate
+        </button>
+
+        <button type="button" class="reset-btn" (click)="reset()">Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Summary -->
+
+  <div class="summary-container" *ngIf="loanSummary?.loanAmount > 0">
+    <div class="summary-card">
+      <div class="card-icon">💰</div>
+
+      <div>
+        <p>Loan Amount</p>
+
+        <h2>₹{{ loanSummary.loanAmount | number }}</h2>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon">%</div>
+
+      <div>
+        <p>Total Interest</p>
+
+        <h2>₹{{ loanSummary.interest | number }}</h2>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon">📊</div>
+
+      <div>
+        <p>Total Amount</p>
+
+        <h2>₹{{ loanSummary.total | number }}</h2>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon">📅</div>
+
+      <div>
+        <p>Monthly EMI</p>
+
+        <h2>₹{{ loanSummary.emi | number }}</h2>
+      </div>
+    </div>
+    <div class="summary-card">
+
+<div class="card-icon">
+
+💳
+
+</div>
+
+<div>
+
+<p>
+
+Total Paid Over Years
+
+</p>
+
+<h2>
+
+₹{{
+loanSummary.totalPaidOverYears
+| number
+}}
+
+</h2>
+
+<small>
+
+(
+₹{{loanSummary.principalPaid | number}}
+
+Principal +
+
+₹{{loanSummary.interestPaid | number}}
+
+Interest
+)
+
+</small>
+
+</div>
+
+</div>
+  </div>
+
+  <!-- Amortization -->
+
+<div
+class="amortization-section"
+*ngIf="groupedAmortization?.length > 0">
+
+<!-- Header -->
+
+<div class="amortization-header">
+
+<div class="header-left">
+
+<h2>
+
+📘 Amortization Schedule
+
+</h2>
+
+<p>
+
+Click on any month to add prepayment and see updated loan savings
+
+</p>
+
+</div>
+
+
+<div class="header-right">
+
+<div class="schedule-badge">
+
+{{groupedAmortization.length}}
+
+Years
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Year accordion -->
+
+<div
+class="year-container"
+*ngFor="
+let yearData
+of groupedAmortization
+">
+
+<div
+class="year-header"
+(click)="toggleYear(yearData)">
+
+<div class="year-left">
+
+<span class="year-icon">
+
+📅
+
+</span>
+
+<div>
+
+<h4>
+
+{{yearData.year}}
+
+</h4>
+
+<small>
+
+{{yearData.months.length}}
+Months
+
+</small>
+
+</div>
+
+</div>
+
+
+<div class="year-toggle">
+
+{{yearData.expanded
+?
+'−'
+:
+'+'}}
+
+</div>
+
+</div>
+
+
+
+<div
+*ngIf="
+yearData.expanded">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Month</th>
+
+<th>EMI</th>
+
+<th>Interest</th>
+
+<th>Principal</th>
+
+<th>Remaining Balance</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+<ng-container
+*ngFor="
+let row
+of yearData.months
+">
+
+
+<tr
+*ngIf="
+!row.isPrepaymentInfo
+">
+
+<td>
+
+{{row.month}}
+
+</td>
+
+
+<td>
+
+₹{{row.emi
+| number:'1.0-0'}}
+
+</td>
+
+
+<td>
+
+₹{{row.interest
+| number:'1.0-0'}}
+
+</td>
+
+
+<td>
+
+₹{{row.principal
+| number:'1.0-0'}}
+
+</td>
+
+
+<td>
+
+₹{{row.balance
+| number:'1.0-0'}}
+
+</td>
+
+
+<td>
+
+<button
+class="pre-btn"
+(click)="openPrepayment(row)">
+
+Add Prepayment
+
+</button>
+
+</td>
+
+</tr>
+
+
+
+<tr
+*ngIf="
+row.isPrepaymentInfo
+"
+class="
+prepayment-row
+">
+
+<td colspan="6">
+
+💰
+Prepayment:
+₹{{row.prepaymentAmount|number}}
+
+&nbsp;&nbsp;
+
+📉
+Interest Saved:
+₹{{row.interestSaved|number}}
+
+&nbsp;&nbsp;
+
+⏳
+Tenure Reduced:
+{{row.tenureReduced}}
+Months
+
+</td>
+
+</tr>
+
+</ng-container>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- Prepayment popup -->
+
+<div class="overlay" *ngIf="showPrepayment">
+  <div class="popup">
+    <h3>Add Prepayment</h3>
+
+    <p>
+      Selected:
+
+      <b>
+        {{ selectedRow?.month }}
+
+        {{ selectedRow?.year }}
+      </b>
+    </p>
+
+    <input
+      #prepaymentInput
+      type="number"
+      placeholder="
+Enter prepayment amount"
+    />
+
+    <div class="popup-buttons">
+      <button
+        class="apply-btn"
+        (click)="applyPrepayment(+prepaymentInput.value)"
+      >
+        Apply
+      </button>
+
+      <button class="cancel-btn" (click)="showPrepayment = false">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
